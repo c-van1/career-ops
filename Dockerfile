@@ -1,9 +1,9 @@
 # career-ops container
-# Base: Playwright image with Chromium preinstalled (matches playwright@1.61.0 in package.json).
+# Base: Playwright image with Chromium preinstalled (matches playwright@1.58.1 in package.json).
 # Host kernels that block Playwright's chromium installer (e.g. Ubuntu 26.04) work fine here
 # because the browser ships in the image and runs under the image's userland.
 
-FROM mcr.microsoft.com/playwright:v1.61.0-jammy
+FROM mcr.microsoft.com/playwright:v1.61.1-jammy
 
 ENV DEBIAN_FRONTEND=noninteractive \
     NODE_ENV=development \
@@ -32,8 +32,10 @@ RUN set -eux; \
 WORKDIR /app
 
 # Prime npm deps in a layer so rebuilds stay fast.
+# Pin playwright to the version that matches the base image's bundled chromium.
 COPY package.json package-lock.json* ./
-RUN npm install --no-audit --no-fund
+RUN npm install --no-audit --no-fund \
+ && npm install --no-audit --no-fund --save-exact playwright@1.58.1
 
 # The rest of the project is bind-mounted at runtime via docker compose,
 # so we don't COPY sources here — keeps the image generic and lets local
